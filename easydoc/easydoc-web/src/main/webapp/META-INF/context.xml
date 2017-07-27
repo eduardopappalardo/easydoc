@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+	
+	<Resource
+		type="javax.sql.DataSource"
+		name="jdbc/easydoc"
+		url="jdbc:mysql://localhost:10000/EasyDoc"
+		username="root"
+		password="ryder11"
+		driverClassName="com.mysql.jdbc.Driver"
+		auth="Container"
+		maxActive="100" maxIdle="30" maxWait="10000"/>
+		
+</Context>

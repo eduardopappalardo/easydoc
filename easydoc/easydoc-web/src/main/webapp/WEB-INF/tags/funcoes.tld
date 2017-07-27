@@ -1,0 +1,24 @@
+<taglib>
+
+	<tlib-version>1.0</tlib-version>
+	<jsp-version>2.1</jsp-version>
+
+	<function>
+		<name>listaContem</name>
+		<function-class>davidsolutions.easydoc.web.utilidade.FuncoesEl</function-class>
+		<function-signature>java.lang.boolean listaContem(java.util.List, java.lang.Object)</function-signature>
+	</function>
+
+	<function>
+		<name>imprimir</name>
+		<function-class>davidsolutions.easydoc.web.utilidade.FuncoesEl</function-class>
+		<function-signature>java.lang.String imprimir(java.lang.Object)</function-signature>
+	</function>
+
+	<function>
+		<name>encriptar</name>
+		<function-class>davidsolutions.easydoc.web.utilidade.FuncoesEl</function-class>
+		<function-signature>java.lang.String encriptar(java.lang.String)</function-signature>
+	</function>
+
+</taglib>
