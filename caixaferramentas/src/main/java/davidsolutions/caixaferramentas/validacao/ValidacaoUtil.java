@@ -68,7 +68,7 @@ public class ValidacaoUtil {
 	public static boolean validarCpf(String cpf) {
 
 		if (!estaVazio(cpf) && cpf.matches(REGEX_CPF)) {
-			String cpfTemp = cpf.toString().replaceFirst("\\.\\d+$", "");
+			String cpfTemp = cpf.toString().replaceFirst("\\D", "");
 
 			if (cpfTemp.length() != 11) {
 				return false;
@@ -85,7 +85,7 @@ public class ValidacaoUtil {
 	public static boolean validarCnpj(String cnpj) {
 
 		if (!estaVazio(cnpj) && cnpj.matches(REGEX_CNPJ)) {
-			String cnpjTemp = cnpj.toString().replaceFirst("\\.\\d+$", "");
+			String cnpjTemp = cnpj.toString().replaceFirst("\\D", "");
 
 			if (cnpjTemp.length() != 14) {
 				return false;
