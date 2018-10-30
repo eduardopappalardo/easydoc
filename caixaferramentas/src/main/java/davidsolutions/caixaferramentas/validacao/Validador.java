@@ -2,110 +2,78 @@ package davidsolutions.caixaferramentas.validacao;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import davidsolutions.caixaferramentas.constante.Dicionario;
 import davidsolutions.caixaferramentas.servico.FalhaExecucaoException;
-import davidsolutions.caixaferramentas.validacao.Validacao.SituacaoValidacao;
 
 public class Validador {
 
-	private List<Validacao> validacoes = new ArrayList<Validacao>();
-	private Map<Integer, Validacao> validacoesIdentificadas = new HashMap<Integer, Validacao>();
+	private List<Parametro> parametros = new ArrayList<Parametro>();
 
-	public ParametroString adicionarValidacao(String identificacaoParametro, String nomeParametro, String valorParametro) {
-		return new ParametroString(identificacaoParametro, nomeParametro, valorParametro);
+	public ParametroString adicionarValidacao(String identificacaoParametro, String nomeParametro,
+			String valorParametro) {
+		ParametroString parametro = new ParametroString(identificacaoParametro, nomeParametro, valorParametro);
+		this.parametros.add(parametro);
+		return parametro;
 	}
 
-	public ParametroNumerico adicionarValidacao(String identificacaoParametro, String nomeParametro, Number valorParametro) {
-		return new ParametroNumerico(identificacaoParametro, nomeParametro, valorParametro);
+	public ParametroNumerico adicionarValidacao(String identificacaoParametro, String nomeParametro,
+			Number valorParametro) {
+		ParametroNumerico parametro = new ParametroNumerico(identificacaoParametro, nomeParametro, valorParametro);
+		this.parametros.add(parametro);
+		return parametro;
 	}
 
-	public ParametroLista adicionarValidacao(String identificacaoParametro, String nomeParametro, List<?> valorParametro) {
-		return new ParametroLista(identificacaoParametro, nomeParametro, valorParametro);
+	public ParametroLista adicionarValidacao(String identificacaoParametro, String nomeParametro,
+			List<?> valorParametro) {
+		ParametroLista parametro = new ParametroLista(identificacaoParametro, nomeParametro, valorParametro);
+		this.parametros.add(parametro);
+		return parametro;
 	}
 
-	public ParametroGenerico adicionarValidacao(String identificacaoParametro, String nomeParametro, Object valorParametro) {
-		return new ParametroGenerico(identificacaoParametro, nomeParametro, valorParametro);
+	public ParametroGenerico adicionarValidacao(String identificacaoParametro, String nomeParametro,
+			Object valorParametro) {
+		ParametroGenerico parametro = new ParametroGenerico(identificacaoParametro, nomeParametro, valorParametro);
+		this.parametros.add(parametro);
+		return parametro;
 	}
 
 	public Validador adicionarValidacao(Validacao validacao) {
-		this.validacoes.add(validacao);
-		return this;
-	}
-
-	public Validador dependeValidacaoAnterior() {
-
-		if (!this.validacoes.isEmpty()) {
-			Validacao validacao = this.validacoes.get(this.validacoes.size() - 1);
-			validacao.setDependeValidacaoAnterior(true);
-		}
-		return this;
-	}
-
-	public Validador identificacaoValidacao(Integer identificacaoValidacao) {
-
-		if (!this.validacoes.isEmpty()) {
-			Validacao validacao = this.validacoes.get(this.validacoes.size() - 1);
-			validacao.setIdentificacaoValidacao(identificacaoValidacao);
-			this.validacoesIdentificadas.put(identificacaoValidacao, validacao);
-		}
-		return this;
-	}
-
-	public Validador dependeValidacaoIdentificada(Integer identificacaoValidacaoDependencia) {
-
-		if (!this.validacoes.isEmpty()) {
-			Validacao validacao = this.validacoes.get(this.validacoes.size() - 1);
-			validacao.setIdentificacaoValidacaoDependencia(identificacaoValidacaoDependencia);
-		}
+		// this.validacoes.add(validacao);
 		return this;
 	}
 
 	public void validarNulo(String nomeParametro, Object valorParametro) throws ValidacaoException {
 
 		if (valorParametro == null) {
-			throw new ValidacaoException(new Mensagem(Dicionario.VALIDACAO_DADOS_PARAMETRO_NULO.obterValor(nomeParametro)));
+			throw new ValidacaoException(
+					new Mensagem(Dicionario.VALIDACAO_DADOS_PARAMETRO_NULO.obterValor(nomeParametro)));
 		}
 	}
 
 	public void validar() throws ValidacaoException, FalhaExecucaoException {
 		ValidacaoException validacaoException = new ValidacaoException();
-		SituacaoValidacao situacaoValidacaoAnterior = null;
-		Validacao validacaoDependencia = null;
 
-		for (Validacao validacao : this.validacoes) {
+		for (Parametro parametro : parametros) {
 
-			if (validacao.getDependeValidacaoAnterior() && (SituacaoValidacao.PROCESSADO_ERRO.equals(situacaoValidacaoAnterior) || SituacaoValidacao.NAO_PROCESSADO.equals(situacaoValidacaoAnterior))) {
-				continue;
-			}
-			else if (validacao.getIdentificacaoValidacaoDependencia() != null) {
-				validacaoDependencia = this.validacoesIdentificadas.get(validacao.getIdentificacaoValidacaoDependencia());
+			for (Object validacaoTemp : parametro.getValidacoes()) {
+				Validacao validacao = (Validacao) validacaoTemp;
+				try {
+					validacao.validar();
 
-				if (validacaoDependencia != null && (validacaoDependencia.getSituacaoValidacao().equals(SituacaoValidacao.PROCESSADO_ERRO) || validacaoDependencia.getSituacaoValidacao().equals(SituacaoValidacao.NAO_PROCESSADO))) {
-					continue;
+				} catch (ValidacaoException excecao) {
+					validacaoException.obterMensagens().addAll(excecao.obterMensagens());
+
+				} catch (FalhaExecucaoException excecao) {
+					throw excecao;
+
+				} catch (Exception excecao) {
+					throw new FalhaExecucaoException(excecao);
 				}
 			}
-			try {
-				validacao.validar();
-				validacao.setSituacaoValidacao(SituacaoValidacao.PROCESSADO_SUCESSO);
-			}
-			catch (ValidacaoException excecao) {
-				validacaoException.obterMensagens().addAll(excecao.obterMensagens());
-				validacao.setSituacaoValidacao(SituacaoValidacao.PROCESSADO_ERRO);
-			}
-			catch (FalhaExecucaoException excecao) {
-				throw excecao;
-			}
-			catch (Exception excecao) {
-				throw new FalhaExecucaoException(excecao);
-			}
-			situacaoValidacaoAnterior = validacao.getSituacaoValidacao();
 		}
-		this.validacoes.clear();
-		this.validacoesIdentificadas.clear();
+		this.parametros.clear();
 
 		if (!validacaoException.obterMensagens().isEmpty()) {
 			throw validacaoException;
@@ -117,6 +85,7 @@ public class Validador {
 		protected String identificacao;
 		protected String nome;
 		protected T1 valor;
+		protected List<Validacao> validacoes = new ArrayList<Validacao>();
 
 		private Parametro(String identificacao, String nome, T1 valor) {
 			this.identificacao = identificacao;
@@ -124,28 +93,18 @@ public class Validador {
 			this.valor = valor;
 		}
 
-		public T2 dependeValidacaoAnterior() {
-			Validador.this.dependeValidacaoAnterior();
-			return (T2) this;
-		}
-
-		public T2 identificacaoValidacao(Integer identificacaoValidacao) {
-			Validador.this.identificacaoValidacao(identificacaoValidacao);
-			return (T2) this;
-		}
-
-		public T2 dependeValidacaoIdentificada(Integer identificacaoValidacaoDependencia) {
-			Validador.this.dependeValidacaoIdentificada(identificacaoValidacaoDependencia);
-			return (T2) this;
+		public List<Validacao> getValidacoes() {
+			return this.validacoes;
 		}
 
 		public T2 validarPreenchimento() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			this.validacoes.add(new Validacao() {
 
 				public void validar() throws ValidacaoException {
 
 					if (estaVazio()) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_VALOR_OBRIGATORIO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_VALOR_OBRIGATORIO.obterValor(nome)));
 					}
 				}
 			});
@@ -153,18 +112,18 @@ public class Validador {
 		}
 
 		public T2 validarCadastrado(final ExecutorConsulta executorConsulta) {
-			Validador.this.adicionarValidacao(new Validacao() {
+			this.validacoes.add(new Validacao() {
 
 				public void validar() throws ValidacaoException, FalhaExecucaoException {
 					boolean estaCadastrado;
 					try {
 						estaCadastrado = executorConsulta.estaCadastrado();
-					}
-					catch (Exception excecao) {
+					} catch (Exception excecao) {
 						throw new FalhaExecucaoException(excecao);
 					}
 					if (!estaCadastrado) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_VALOR_NAO_CADASTRADO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_VALOR_NAO_CADASTRADO.obterValor(nome)));
 					}
 				}
 			});
@@ -172,18 +131,18 @@ public class Validador {
 		}
 
 		public T2 validarNaoCadastrado(final ExecutorConsulta executorConsulta) {
-			Validador.this.adicionarValidacao(new Validacao() {
+			this.validacoes.add(new Validacao() {
 
 				public void validar() throws ValidacaoException, FalhaExecucaoException {
 					boolean estaCadastrado;
 					try {
 						estaCadastrado = executorConsulta.estaCadastrado();
-					}
-					catch (Exception excecao) {
+					} catch (Exception excecao) {
 						throw new FalhaExecucaoException(excecao);
 					}
 					if (estaCadastrado) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_VALOR_CADASTRADO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_VALOR_CADASTRADO.obterValor(nome)));
 					}
 				}
 			});
@@ -206,17 +165,18 @@ public class Validador {
 		}
 
 		protected T2 validarTamanho(final BigDecimal tamanhoMinimo, final BigDecimal tamanhoMaximo) {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio()) {
 
 						if (obterTamanho().compareTo(tamanhoMinimo) == -1) {
-							throw new ValidacaoException(new Mensagem(identificacao, obterMensagemTamanhoMinimo().obterValor(nome, tamanhoMinimo)));
-						}
-						else if (obterTamanho().compareTo(tamanhoMaximo) == 1) {
-							throw new ValidacaoException(new Mensagem(identificacao, obterMensagemTamanhoMaximo().obterValor(nome, tamanhoMaximo)));
+							throw new ValidacaoException(new Mensagem(identificacao,
+									obterMensagemTamanhoMinimo().obterValor(nome, tamanhoMinimo)));
+						} else if (obterTamanho().compareTo(tamanhoMaximo) == 1) {
+							throw new ValidacaoException(new Mensagem(identificacao,
+									obterMensagemTamanhoMaximo().obterValor(nome, tamanhoMaximo)));
 						}
 					}
 				}
@@ -239,13 +199,13 @@ public class Validador {
 		}
 
 		public ParametroString validarEmail() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarEmail(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_EMAIL_INVALIDO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_EMAIL_INVALIDO.obterValor(nome)));
 					}
 				}
 			});
@@ -253,13 +213,13 @@ public class Validador {
 		}
 
 		public ParametroString validarCpf() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarCpf(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_CPF_INVALIDO.obterValor(nome)));
+						throw new ValidacaoException(
+								new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_CPF_INVALIDO.obterValor(nome)));
 					}
 				}
 			});
@@ -267,13 +227,13 @@ public class Validador {
 		}
 
 		public ParametroString validarCnpj() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarCnpj(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_CNPJ_INVALIDO.obterValor(nome)));
+						throw new ValidacaoException(
+								new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_CNPJ_INVALIDO.obterValor(nome)));
 					}
 				}
 			});
@@ -281,13 +241,13 @@ public class Validador {
 		}
 
 		public ParametroString validarData() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarData(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_DATA_INVALIDA.obterValor(nome)));
+						throw new ValidacaoException(
+								new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_DATA_INVALIDA.obterValor(nome)));
 					}
 				}
 			});
@@ -295,13 +255,13 @@ public class Validador {
 		}
 
 		public ParametroString validarNumero() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarNumero(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_NUMERO_INVALIDO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_NUMERO_INVALIDO.obterValor(nome)));
 					}
 				}
 			});
@@ -309,13 +269,13 @@ public class Validador {
 		}
 
 		public ParametroString validarNumeroInteiro() {
-			Validador.this.adicionarValidacao(new Validacao() {
+			super.validacoes.add(new Validacao() {
 
-				@Override
 				public void validar() throws ValidacaoException {
 
 					if (!estaVazio() && !ValidacaoUtil.validarNumeroInteiro(valor)) {
-						throw new ValidacaoException(new Mensagem(identificacao, Dicionario.VALIDACAO_DADOS_NUMERO_INVALIDO.obterValor(nome)));
+						throw new ValidacaoException(new Mensagem(identificacao,
+								Dicionario.VALIDACAO_DADOS_NUMERO_INVALIDO.obterValor(nome)));
 					}
 				}
 			});

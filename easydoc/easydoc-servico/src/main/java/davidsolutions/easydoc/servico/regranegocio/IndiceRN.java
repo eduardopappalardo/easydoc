@@ -31,9 +31,12 @@ public class IndiceRN extends Servico<IndiceDao> {
 
 			for (int posicao = 0; posicao < indices.size(); posicao++) {
 				indice = indices.get(posicao);
-				validador.adicionarValidacao("nomeIndice" + posicao, "Nome do índice", indice.getNome()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
-				validador.adicionarValidacao("tipoIndice" + posicao, "Tipo de índice", indice.getTipoIndice()).validarPreenchimento();
-				validador.adicionarValidacao("preenchimentoObrigatorio" + posicao, "Preenchimento obrigatório", indice.getPreenchimentoObrigatorio()).validarPreenchimento();
+				validador.adicionarValidacao("nomeIndice" + posicao, "Nome do índice", indice.getNome())
+						.validarPreenchimento().validarTamanho(1, 100);
+				validador.adicionarValidacao("tipoIndice" + posicao, "Tipo de índice", indice.getTipoIndice())
+						.validarPreenchimento();
+				validador.adicionarValidacao("preenchimentoObrigatorio" + posicao, "Preenchimento obrigatório",
+						indice.getPreenchimentoObrigatorio()).validarPreenchimento();
 			}
 			validador.validar();
 		}

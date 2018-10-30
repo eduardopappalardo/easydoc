@@ -45,14 +45,14 @@ public class GrupoRN extends Servico<GrupoDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Void> alterar(Grupo grupo) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Void> alterar(Grupo grupo)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		this.validar(grupo, true);
 		try {
 			GrupoDao grupoDao = this.obterDao();
@@ -69,30 +69,29 @@ public class GrupoRN extends Servico<GrupoDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (RegistroInexistenteException excecao) {
+		} catch (RegistroInexistenteException excecao) {
 			super.cancelarTransacao();
 			throw excecao;
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Grupo> consultarPorCodigo(Integer codigoGrupo) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Grupo> consultarPorCodigo(Integer codigoGrupo)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_GRUPO.obterValor(), codigoGrupo);
 		try {
 			Grupo grupo = this.obterDao().consultarPorCodigo(codigoGrupo);
 			grupo.setUsuarios(new UsuarioRN(super.obterConexao()).listarAtivosPorCodigoGrupo(codigoGrupo).getDados());
 			return new RespostaServico<Grupo>(grupo);
-		}
-		catch (DaoException excecao) {
+		} catch (DaoException excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Grupo>> consultar(Grupo grupoFiltro, Paginacao paginacao) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Grupo>> consultar(Grupo grupoFiltro, Paginacao paginacao)
+			throws ValidacaoException, FalhaExecucaoException {
 
 		if (grupoFiltro != null) {
 			Validador validador = new Validador();
@@ -102,40 +101,39 @@ public class GrupoRN extends Servico<GrupoDao> {
 		try {
 			List<Grupo> lista = this.obterDao().consultar(grupoFiltro, paginacao);
 			return new RespostaServico<List<Grupo>>(lista);
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Boolean> existeCodigo(Integer codigoGrupo) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Boolean> existeCodigo(Integer codigoGrupo)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_GRUPO.obterValor(), codigoGrupo);
 		Grupo grupo = new Grupo(codigoGrupo);
 		grupo.setAtivo(true);
 		try {
 			return new RespostaServico<Boolean>(this.obterDao().existeCodigo(grupo));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Grupo>> listarAtivosPorCodigoCliente(Integer codigoCliente) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Grupo>> listarAtivosPorCodigoCliente(Integer codigoCliente)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_CLIENTE.obterValor(), codigoCliente);
 		try {
 			return new RespostaServico<List<Grupo>>(this.obterDao().listarAtivosPorCodigoCliente(codigoCliente));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Grupo>> listarAtivosPorCodigoUsuario(Integer codigoUsuario) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Grupo>> listarAtivosPorCodigoUsuario(Integer codigoUsuario)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario);
 		try {
 			return new RespostaServico<List<Grupo>>(this.obterDao().listarAtivosPorCodigoUsuario(codigoUsuario));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
@@ -145,28 +143,34 @@ public class GrupoRN extends Servico<GrupoDao> {
 		validador.validarNulo("grupo", grupo);
 
 		if (alteracao) {
-			validador.adicionarValidacao(null, Dicionario.CODIGO_GRUPO.obterValor(), grupo.getCodigoGrupo()).validarPreenchimento();
-		}
-		else {
-			validador.adicionarValidacao("cliente", "Cliente", (grupo.getCliente() != null ? grupo.getCliente().getCodigoCliente() : null)).validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
+			validador.adicionarValidacao(null, Dicionario.CODIGO_GRUPO.obterValor(), grupo.getCodigoGrupo())
+					.validarPreenchimento();
+		} else {
+			validador
+					.adicionarValidacao("cliente", "Cliente",
+							(grupo.getCliente() != null ? grupo.getCliente().getCodigoCliente() : null))
+					.validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
 
-				public boolean estaCadastrado() throws Exception {
-					return new ClienteRN(obterConexao()).existeCodigo(grupo.getCliente().getCodigoCliente()).getDados();
-				}
-			}).dependeValidacaoAnterior();
+						public boolean estaCadastrado() throws Exception {
+							return new ClienteRN(obterConexao()).existeCodigo(grupo.getCliente().getCodigoCliente())
+									.getDados();
+						}
+					});
 		}
-		validador.adicionarValidacao("nome", "Nome", grupo.getNome()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
+		validador.adicionarValidacao("nome", "Nome", grupo.getNome()).validarPreenchimento().validarTamanho(1, 100);
 		validador.adicionarValidacao("ativo", "Ativo", grupo.getAtivo()).validarPreenchimento();
 
 		if (!ValidacaoUtil.estaVazio(grupo.getUsuarios())) {
 
 			for (final Usuario usuario : grupo.getUsuarios()) {
-				validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), usuario.getCodigoUsuario()).validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
+				validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), usuario.getCodigoUsuario())
+						.validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
 
-					public boolean estaCadastrado() throws Exception {
-						return new UsuarioRN(obterConexao()).existeCodigo(usuario.getCodigoUsuario()).getDados();
-					}
-				}).dependeValidacaoAnterior();
+							public boolean estaCadastrado() throws Exception {
+								return new UsuarioRN(obterConexao()).existeCodigo(usuario.getCodigoUsuario())
+										.getDados();
+							}
+						});
 			}
 		}
 		validador.validar();

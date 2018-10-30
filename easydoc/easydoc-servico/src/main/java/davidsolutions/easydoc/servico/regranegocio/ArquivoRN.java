@@ -34,18 +34,19 @@ public class ArquivoRN extends Servico<ArquivoDao> {
 			for (int posicao = 0; posicao < arquivos.size(); posicao++) {
 				final Arquivo arquivo = arquivos.get(posicao);
 				final int posicaoTemp = posicao;
-				validador.adicionarValidacao(("descricao" + posicaoTemp), "Descrição", arquivo.getDescricao()).validarTamanho(1, 100);
-				validador.adicionarValidacao(null, "Nome do arquivo", arquivo.getNomeOriginal()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
+				validador.adicionarValidacao(("descricao" + posicaoTemp), "Descrição", arquivo.getDescricao())
+						.validarTamanho(1, 100);
+				validador.adicionarValidacao(null, "Nome do arquivo", arquivo.getNomeOriginal()).validarPreenchimento()
+						.validarTamanho(1, 100);
 				validador.adicionarValidacao(new Validacao() {
 
-					@Override
 					public void validar() throws ValidacaoException, FalhaExecucaoException {
 						try {
 							if (arquivo.getConteudo() == null || arquivo.getConteudo().available() == 0) {
-								throw new ValidacaoException(new Mensagem("conteudo" + posicaoTemp, "É obrigatória a escolha de um arquivo."));
+								throw new ValidacaoException(new Mensagem("conteudo" + posicaoTemp,
+										"É obrigatória a escolha de um arquivo."));
 							}
-						}
-						catch (IOException excecao) {
+						} catch (IOException excecao) {
 							throw new FalhaExecucaoException(excecao);
 						}
 					}

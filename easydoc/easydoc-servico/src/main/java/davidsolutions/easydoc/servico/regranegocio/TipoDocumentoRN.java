@@ -31,7 +31,8 @@ public class TipoDocumentoRN extends Servico<TipoDocumentoDao> {
 		super(conexao);
 	}
 
-	public RespostaServico<Void> adicionar(TipoDocumento tipoDocumento) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Void> adicionar(TipoDocumento tipoDocumento)
+			throws ValidacaoException, FalhaExecucaoException {
 		this.validar(tipoDocumento, false);
 		try {
 			super.iniciarTransacao();
@@ -51,18 +52,19 @@ public class TipoDocumentoRN extends Servico<TipoDocumentoDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Void> alterar(TipoDocumento tipoDocumento) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Void> alterar(TipoDocumento tipoDocumento)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		this.validar(tipoDocumento, true);
 		try {
 			IndiceDao indiceDao = new IndiceDao(super.obterConexao());
-			List<Indice> indicesAtuais = indiceDao.consultarPorCodigoTipoDocumento(tipoDocumento.getCodigoTipoDocumento());
+			List<Indice> indicesAtuais = indiceDao
+					.consultarPorCodigoTipoDocumento(tipoDocumento.getCodigoTipoDocumento());
 
 			super.iniciarTransacao();
 			super.obterDao().alterar(tipoDocumento);
@@ -72,73 +74,73 @@ public class TipoDocumentoRN extends Servico<TipoDocumentoDao> {
 				if (indice.getCodigoIndice() == null) {
 					indice.setTipoDocumento(tipoDocumento);
 					indiceDao.adicionar(indice);
-				}
-				else if (indicesAtuais.contains(indice)) {
-					// TODO: Verificar consistência da base
+				} else if (indicesAtuais.contains(indice)) {
+					// TODO: Verificar consistÃªncia da base
 					indiceDao.alterar(indice);
 				}
 			}
 			for (Indice indice : indicesAtuais) {
 
 				if (!tipoDocumento.getIndices().contains(indice)) {
-					// TODO: Verificar consistência da base
+					// TODO: Verificar consistÃªncia da base
 					indiceDao.excluir(indice.getCodigoIndice());
 				}
 			}
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (RegistroInexistenteException excecao) {
+		} catch (RegistroInexistenteException excecao) {
 			super.cancelarTransacao();
 			throw excecao;
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Void> excluir(Integer codigoTipoDocumento) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Void> excluir(Integer codigoTipoDocumento)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(), codigoTipoDocumento);
 		try {
 			IndiceDao indiceDao = new IndiceDao(super.obterConexao());
 
 			super.iniciarTransacao();
-			// TODO: Verificar consistência da base
+			// TODO: Verificar consistÃªncia da base
 			indiceDao.excluirPorCodigoTipoDocumento(codigoTipoDocumento);
 			super.obterDao().excluir(codigoTipoDocumento);
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<TipoDocumento> consultarPorCodigo(Integer codigoTipoDocumento) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<TipoDocumento> consultarPorCodigo(Integer codigoTipoDocumento)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(), codigoTipoDocumento);
 		try {
 			IndiceDao indiceDao = new IndiceDao(super.obterConexao());
 			TipoDocumento tipoDocumento = super.obterDao().consultarPorCodigo(codigoTipoDocumento);
 			tipoDocumento.setIndices(indiceDao.consultarPorCodigoTipoDocumento(codigoTipoDocumento));
 
-			if (tipoDocumento.getTipoDocumentoPai() != null && tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento() != null) {
-				TipoDocumento tipoDocumentoPai = this.consultarPorCodigo(tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento()).getDados();
+			if (tipoDocumento.getTipoDocumentoPai() != null
+					&& tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento() != null) {
+				TipoDocumento tipoDocumentoPai = this
+						.consultarPorCodigo(tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento()).getDados();
 				tipoDocumento.setTipoDocumentoPai(tipoDocumentoPai);
 				tipoDocumento.getIndicesHerdados().addAll(tipoDocumentoPai.getIndicesHerdados());
 				tipoDocumento.getIndicesHerdados().addAll(tipoDocumentoPai.getIndices());
 			}
 			return new RespostaServico<TipoDocumento>(tipoDocumento);
-		}
-		catch (DaoException excecao) {
+		} catch (DaoException excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<TipoDocumento>> consultar(TipoDocumento tipoDocumentoFiltro, Paginacao paginacao) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<TipoDocumento>> consultar(TipoDocumento tipoDocumentoFiltro, Paginacao paginacao)
+			throws ValidacaoException, FalhaExecucaoException {
 
 		if (tipoDocumentoFiltro != null) {
 			Validador validador = new Validador();
@@ -148,63 +150,66 @@ public class TipoDocumentoRN extends Servico<TipoDocumentoDao> {
 		try {
 			List<TipoDocumento> lista = this.obterDao().consultar(tipoDocumentoFiltro, paginacao);
 			return new RespostaServico<List<TipoDocumento>>(lista);
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<TipoDocumento>> listarPorCodigoCliente(Integer codigoCliente) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<TipoDocumento>> listarPorCodigoCliente(Integer codigoCliente)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_CLIENTE.obterValor(), codigoCliente);
 		try {
 			List<TipoDocumento> lista = this.obterDao().listarPorCodigoCliente(codigoCliente);
 			return new RespostaServico<List<TipoDocumento>>(lista);
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	private void validar(final TipoDocumento tipoDocumento, boolean alteracao) throws ValidacaoException, FalhaExecucaoException {
+	private void validar(final TipoDocumento tipoDocumento, boolean alteracao)
+			throws ValidacaoException, FalhaExecucaoException {
 		Validador validador = new Validador();
 		validador.validarNulo("tipoDocumento", tipoDocumento);
 
 		if (alteracao) {
-			validador.adicionarValidacao(null, Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(), tipoDocumento.getCodigoTipoDocumento()).validarPreenchimento();
-		}
-		else {
-			validador.adicionarValidacao("cliente", "Cliente", (tipoDocumento.getCliente() != null ? tipoDocumento.getCliente().getCodigoCliente() : null)).validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
+			validador.adicionarValidacao(null, Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(),
+					tipoDocumento.getCodigoTipoDocumento()).validarPreenchimento();
+		} else {
+			validador
+					.adicionarValidacao("cliente", "Cliente",
+							(tipoDocumento.getCliente() != null ? tipoDocumento.getCliente().getCodigoCliente() : null))
+					.validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
 
-				public boolean estaCadastrado() throws Exception {
-					return new ClienteRN(obterConexao()).existeCodigo(tipoDocumento.getCliente().getCodigoCliente()).getDados();
-				}
-			}).dependeValidacaoAnterior();
+						public boolean estaCadastrado() throws Exception {
+							return new ClienteRN(obterConexao())
+									.existeCodigo(tipoDocumento.getCliente().getCodigoCliente()).getDados();
+						}
+					});
 		}
-		validador.adicionarValidacao("nome", "Nome", tipoDocumento.getNome()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
-		validador.adicionarValidacao(null, "Índices", tipoDocumento.getIndices()).validarPreenchimento();
+		validador.adicionarValidacao("nome", "Nome", tipoDocumento.getNome()).validarPreenchimento().validarTamanho(1,
+				100);
+		validador.adicionarValidacao(null, "Ã�ndices", tipoDocumento.getIndices()).validarPreenchimento();
 		validador.adicionarValidacao(new Validacao() {
 
-			@Override
 			public void validar() throws ValidacaoException, FalhaExecucaoException {
 				new IndiceRN().validar(tipoDocumento.getIndices());
 			}
-		}).dependeValidacaoAnterior();
+		});
 
 		/*
 		 * if (tipoDocumento.getTipoDocumentoPai() != null &&
-		 * tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento() != null)
-		 * { validador.adicionarValidacao(new Validacao() {
+		 * tipoDocumento.getTipoDocumentoPai().getCodigoTipoDocumento() != null) {
+		 * validador.adicionarValidacao(new Validacao() {
 		 * 
 		 * @Override public void validar() throws ValidacaoException,
 		 * FalhaExecucaoException { TipoDocumento tipoDocumentoPai = null; try {
 		 * tipoDocumentoPai =
 		 * obterDao().consultarPorCodigo(tipoDocumento.getTipoDocumentoPai
 		 * ().getCodigoTipoDocumento()); } catch (Exception excecao) { throw new
-		 * FalhaExecucaoException(excecao); } if
-		 * (tipoDocumentoPai.getTipoDocumentoPai() != null &&
-		 * tipoDocumentoPai.getTipoDocumentoPai().getCodigoTipoDocumento() !=
+		 * FalhaExecucaoException(excecao); } if (tipoDocumentoPai.getTipoDocumentoPai()
+		 * != null && tipoDocumentoPai.getTipoDocumentoPai().getCodigoTipoDocumento() !=
 		 * null) { throw new ValidacaoException(new Mensagem("tipoDocumentoPai",
-		 * "O Tipo de documento pai possui herança e somente 1 nível de herança é permitido."
+		 * "O Tipo de documento pai possui heranÃ§a e somente 1 nÃ­vel de heranÃ§a Ã© permitido."
 		 * )); } } }); }
 		 */
 		validador.validar();

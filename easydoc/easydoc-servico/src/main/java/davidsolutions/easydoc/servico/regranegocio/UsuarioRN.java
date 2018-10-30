@@ -30,7 +30,8 @@ import davidsolutions.easydoc.servico.entidade.Usuario;
 
 public class UsuarioRN extends Servico<UsuarioDao> {
 
-	private static final char[] CARACTERES_SENHA_ALEATORIA = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
+	private static final char[] CARACTERES_SENHA_ALEATORIA = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+			.toCharArray();
 
 	public UsuarioRN() {
 		super(new GerenciadorConexaoProducao());
@@ -63,14 +64,14 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 			super.confirmarTransacao();
 
 			return respostaServico;
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Void> alterar(Usuario usuario) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Void> alterar(Usuario usuario)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		this.validar(usuario, true);
 		try {
 			GrupoDao grupoDao = new GrupoDao(super.obterConexao());
@@ -87,30 +88,29 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (RegistroInexistenteException excecao) {
+		} catch (RegistroInexistenteException excecao) {
 			super.cancelarTransacao();
 			throw excecao;
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Usuario> consultarPorCodigo(Integer codigoUsuario) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Usuario> consultarPorCodigo(Integer codigoUsuario)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario);
 		try {
 			Usuario usuario = this.obterDao().consultarPorCodigo(codigoUsuario);
 			usuario.setGrupos(new GrupoRN(super.obterConexao()).listarAtivosPorCodigoUsuario(codigoUsuario).getDados());
 			return new RespostaServico<Usuario>(usuario);
-		}
-		catch (DaoException excecao) {
+		} catch (DaoException excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Usuario>> consultar(Usuario usuarioFiltro, Paginacao paginacao) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Usuario>> consultar(Usuario usuarioFiltro, Paginacao paginacao)
+			throws ValidacaoException, FalhaExecucaoException {
 
 		if (usuarioFiltro != null) {
 			Validador validador = new Validador();
@@ -122,19 +122,18 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		try {
 			List<Usuario> lista = this.obterDao().consultar(usuarioFiltro, paginacao);
 			return new RespostaServico<List<Usuario>>(lista);
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Void> gerarSenhaAleatoria(Integer codigoUsuario) throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
+	public RespostaServico<Void> gerarSenhaAleatoria(Integer codigoUsuario)
+			throws ValidacaoException, RegistroInexistenteException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario);
 		Usuario usuario = null;
 		try {
 			usuario = this.obterDao().consultarPorCodigo(codigoUsuario);
-		}
-		catch (DaoException excecao) {
+		} catch (DaoException excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 		if (!usuario.getAtivo()) {
@@ -149,28 +148,27 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 
 			respostaServico.getMensagensAlerta().add(new Mensagem(Dicionario.USUARIO_SENHA_GERADA.obterValor()));
 			return respostaServico;
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Usuario> autenticar(String login, String senha) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Usuario> autenticar(String login, String senha)
+			throws ValidacaoException, FalhaExecucaoException {
 		Validador validador = new Validador();
-		validador.adicionarValidacao("login", "Login", login).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
-		validador.adicionarValidacao("senha", "Senha", senha).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
+		validador.adicionarValidacao("login", "Login", login).validarPreenchimento().validarTamanho(1, 100);
+		validador.adicionarValidacao("senha", "Senha", senha).validarPreenchimento().validarTamanho(1, 100);
 		validador.validar();
 
 		Usuario usuario = null;
 		try {
 			usuario = this.validarAcesso(null, login, senha);
 			usuario = this.obterDao().consultarPorCodigo(usuario.getCodigoUsuario());
-		}
-		catch (RegistroInexistenteException excecao) {
-			throw new ValidacaoException(new Mensagem("Login e/ou senha inválidos ou usuário com restrição de acesso."));
-		}
-		catch (Exception excecao) {
+		} catch (RegistroInexistenteException excecao) {
+			throw new ValidacaoException(
+					new Mensagem("Login e/ou senha inválidos ou usuário com restrição de acesso."));
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 		RespostaServico<Usuario> respostaServico = new RespostaServico<Usuario>(usuario);
@@ -179,11 +177,11 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		if (usuario.getDataAlteracaoSenha() == null) {
 			usuario.setNecessitaAlteracaoSenha(true);
 			respostaServico.getMensagensAlerta().add(new Mensagem(Dicionario.USUARIO_SENHA_EXPIRADA.obterValor()));
-		}
-		else {
+		} else {
 			Calendar dataExpiracaoSenha = Calendar.getInstance();
 			dataExpiracaoSenha.setTime(DataUtil.definirHoraMaxima(usuario.getDataAlteracaoSenha()));
-			dataExpiracaoSenha.add(Calendar.DAY_OF_MONTH, Configuracao.SENHA_TEMPO_EXPIRACAO_EM_DIAS.obterValorInteiro());
+			dataExpiracaoSenha.add(Calendar.DAY_OF_MONTH,
+					Configuracao.SENHA_TEMPO_EXPIRACAO_EM_DIAS.obterValorInteiro());
 
 			if (new Date().after(dataExpiracaoSenha.getTime())) {
 				usuario.setNecessitaAlteracaoSenha(true);
@@ -193,19 +191,22 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		return respostaServico;
 	}
 
-	public RespostaServico<Void> alterarSenha(final Integer codigoUsuario, final String senhaAtual, String senhaNova) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Void> alterarSenha(final Integer codigoUsuario, final String senhaAtual, String senhaNova)
+			throws ValidacaoException, FalhaExecucaoException {
 		Validador validador = new Validador();
-		validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario).validarPreenchimento();
-		validador.adicionarValidacao("senhaAtual", "Senha atual", senhaAtual).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
-		validador.adicionarValidacao("senhaNova", "Senha nova", senhaNova).validarPreenchimento().validarTamanho(Configuracao.SENHA_QUANTIDADE_MINIMA_CARACTERES.obterValorInteiro(), 100).dependeValidacaoAnterior();
+		validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario)
+				.validarPreenchimento();
+		validador.adicionarValidacao("senhaAtual", "Senha atual", senhaAtual).validarPreenchimento().validarTamanho(1,
+				100);
+		validador.adicionarValidacao("senhaNova", "Senha nova", senhaNova).validarPreenchimento()
+				.validarTamanho(Configuracao.SENHA_QUANTIDADE_MINIMA_CARACTERES.obterValorInteiro(), 100);
 		validador.validar();
 		try {
 			this.validarAcesso(codigoUsuario, null, senhaAtual);
-		}
-		catch (RegistroInexistenteException excecao) {
-			throw new ValidacaoException(new Mensagem("senhaAtual", "Senha atual inválida ou usuário com restrição de acesso."));
-		}
-		catch (Exception excecao) {
+		} catch (RegistroInexistenteException excecao) {
+			throw new ValidacaoException(
+					new Mensagem("senhaAtual", "Senha atual inválida ou usuário com restrição de acesso."));
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 		Usuario usuario = new Usuario();
@@ -216,12 +217,12 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		boolean existeSenha = false;
 		try {
 			existeSenha = this.obterDao().existeSenha(usuario);
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 		if (senhaNova.equals(senhaAtual) || existeSenha) {
-			throw new ValidacaoException(new Mensagem("senhaNova", "A senha nova deve ser diferente das senhas anteriores."));
+			throw new ValidacaoException(
+					new Mensagem("senhaNova", "A senha nova deve ser diferente das senhas anteriores."));
 		}
 		try {
 			super.iniciarTransacao();
@@ -230,41 +231,40 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<Boolean> existeCodigo(Integer codigoUsuario) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<Boolean> existeCodigo(Integer codigoUsuario)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_USUARIO.obterValor(), codigoUsuario);
 		Usuario usuario = new Usuario(codigoUsuario);
 		usuario.setAtivo(true);
 		try {
 			return new RespostaServico<Boolean>(this.obterDao().existeCodigo(usuario));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Usuario>> listarAtivosPorCodigoCliente(Integer codigoCliente) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Usuario>> listarAtivosPorCodigoCliente(Integer codigoCliente)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_CLIENTE.obterValor(), codigoCliente);
 		try {
 			return new RespostaServico<List<Usuario>>(this.obterDao().listarAtivosPorCodigoCliente(codigoCliente));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	public RespostaServico<List<Usuario>> listarAtivosPorCodigoGrupo(Integer codigoGrupo) throws ValidacaoException, FalhaExecucaoException {
+	public RespostaServico<List<Usuario>> listarAtivosPorCodigoGrupo(Integer codigoGrupo)
+			throws ValidacaoException, FalhaExecucaoException {
 		new Validador().validarNulo(Dicionario.CODIGO_GRUPO.obterValor(), codigoGrupo);
 		try {
 			return new RespostaServico<List<Usuario>>(this.obterDao().listarAtivosPorCodigoGrupo(codigoGrupo));
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
@@ -274,37 +274,45 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		validador.validarNulo("usuario", usuario);
 
 		if (alteracao) {
-			validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), usuario.getCodigoUsuario()).validarPreenchimento().identificacaoValidacao(1);
-		}
-		else {
+			validador.adicionarValidacao(null, Dicionario.CODIGO_USUARIO.obterValor(), usuario.getCodigoUsuario())
+					.validarPreenchimento();
+		} else {
 			usuario.setCodigoUsuario(0);
-			validador.adicionarValidacao("cliente", "Cliente", (usuario.getCliente() != null ? usuario.getCliente().getCodigoCliente() : null)).validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
+			validador
+					.adicionarValidacao("cliente", "Cliente",
+							(usuario.getCliente() != null ? usuario.getCliente().getCodigoCliente() : null))
+					.validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
 
-				public boolean estaCadastrado() throws Exception {
-					return new ClienteRN(obterConexao()).existeCodigo(usuario.getCliente().getCodigoCliente()).getDados();
-				}
-			}).dependeValidacaoAnterior();
+						public boolean estaCadastrado() throws Exception {
+							return new ClienteRN(obterConexao()).existeCodigo(usuario.getCliente().getCodigoCliente())
+									.getDados();
+						}
+					});
 		}
-		validador.adicionarValidacao("tipoUsuario", "Tipo de usuário", usuario.getTipoUsuario()).validarPreenchimento();
-		validador.adicionarValidacao("nome", "Nome", usuario.getNome()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior();
-		validador.adicionarValidacao("login", "Login", usuario.getLogin()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior().validarNaoCadastrado(new ExecutorConsulta() {
+		validador.adicionarValidacao("tipoUsuario", "Tipo de usuário", usuario.getTipoUsuario())
+				.validarPreenchimento();
+		validador.adicionarValidacao("nome", "Nome", usuario.getNome()).validarPreenchimento().validarTamanho(1, 100);
+		validador.adicionarValidacao("login", "Login", usuario.getLogin()).validarPreenchimento().validarTamanho(1, 100)
+				.validarNaoCadastrado(new ExecutorConsulta() {
 
-			public boolean estaCadastrado() throws Exception {
-				return obterDao().existeLogin(usuario);
-			}
-		}).dependeValidacaoAnterior().dependeValidacaoIdentificada(1);
-		validador.adicionarValidacao("email", "E-mail", usuario.getEmail()).validarPreenchimento().validarTamanho(1, 100).dependeValidacaoAnterior().validarEmail().dependeValidacaoAnterior();
+					public boolean estaCadastrado() throws Exception {
+						return obterDao().existeLogin(usuario);
+					}
+				});
+		validador.adicionarValidacao("email", "E-mail", usuario.getEmail()).validarPreenchimento()
+				.validarTamanho(1, 100).validarEmail();
 		validador.adicionarValidacao("ativo", "Ativo", usuario.getAtivo()).validarPreenchimento();
 
 		if (!ValidacaoUtil.estaVazio(usuario.getGrupos())) {
 
 			for (final Grupo grupo : usuario.getGrupos()) {
-				validador.adicionarValidacao(null, Dicionario.CODIGO_GRUPO.obterValor(), grupo.getCodigoGrupo()).validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
+				validador.adicionarValidacao(null, Dicionario.CODIGO_GRUPO.obterValor(), grupo.getCodigoGrupo())
+						.validarPreenchimento().validarCadastrado(new ExecutorConsulta() {
 
-					public boolean estaCadastrado() throws Exception {
-						return new GrupoRN(obterConexao()).existeCodigo(grupo.getCodigoGrupo()).getDados();
-					}
-				}).dependeValidacaoAnterior();
+							public boolean estaCadastrado() throws Exception {
+								return new GrupoRN(obterConexao()).existeCodigo(grupo.getCodigoGrupo()).getDados();
+							}
+						});
 			}
 		}
 		validador.validar();
@@ -319,12 +327,18 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		this.obterDao().alterarSenha(usuario);
 
 		usuario.setSenha(senhaAleatoria);
-		// TODO: Descomentar
-		// enviarEmailSenha(usuario);
+		try {
+			enviarEmailSenha(usuario);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(senhaAleatoria);
 	}
 
-	private Usuario validarAcesso(Integer codigoUsuario, String login, String senha) throws RegistroInexistenteException, DaoException {
+	private Usuario validarAcesso(Integer codigoUsuario, String login, String senha)
+			throws RegistroInexistenteException, DaoException {
 		Usuario usuario = new Usuario();
 		usuario.setCodigoUsuario(codigoUsuario);
 		usuario.setLogin(login);
@@ -359,6 +373,7 @@ public class UsuarioRN extends Servico<UsuarioDao> {
 		mensagem.append("<b>Senha:</b> " + usuario.getSenha());
 		mensagem.append("</body>");
 		mensagem.append("</html>");
-		davidsolutions.easydoc.servico.utilidade.Utilidade.enviarEmail("EasyDoc - Senha de acesso", mensagem.toString(), usuario.getEmail());
+		davidsolutions.easydoc.servico.utilidade.Utilidade.enviarEmail("EasyDoc - Senha de acesso", mensagem.toString(),
+				usuario.getEmail());
 	}
 }

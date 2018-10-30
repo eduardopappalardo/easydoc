@@ -15,42 +15,42 @@ public enum TipoIndice implements BeanEnum {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarNumeroInteiro().dependeValidacaoAnterior();
+			parametroString.validarNumeroInteiro();
 		}
 	},
 	DATA(3, "Data", "data") {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarData().dependeValidacaoAnterior();
+			parametroString.validarData();
 		}
 	},
 	CPF(4, "CPF", "cpf") {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarCpf().dependeValidacaoAnterior();
+			parametroString.validarCpf();
 		}
 	},
 	CNPJ(5, "CNPJ", "cnpj") {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarCnpj().dependeValidacaoAnterior();
+			parametroString.validarCnpj();
 		}
 	},
 	EMAIL(6, "E-mail", "email") {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarEmail().dependeValidacaoAnterior();
+			parametroString.validarEmail();
 		}
 	},
 	NUMERO_FRACIONADO(7, "Número fracionado/Moeda", "numeroFracionado") {
 
 		@Override
 		public void adicionarValidacao(ParametroString parametroString) {
-			parametroString.validarNumero().dependeValidacaoAnterior();
+			parametroString.validarNumero();
 		}
 	};
 

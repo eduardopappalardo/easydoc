@@ -35,7 +35,8 @@ public class DocumentoRN extends Servico<DocumentoDao> {
 		super(conexao);
 	}
 
-	public RespostaServico<Void> adicionar(Documento documento) throws ValidacaoException, FalhaExecucaoException, RegistroInexistenteException, DaoException {
+	public RespostaServico<Void> adicionar(Documento documento)
+			throws ValidacaoException, FalhaExecucaoException, RegistroInexistenteException, DaoException {
 		this.validar(documento, false);
 		try {
 			super.iniciarTransacao();
@@ -45,7 +46,8 @@ public class DocumentoRN extends Servico<DocumentoDao> {
 				if (!ValidacaoUtil.estaVazio(indice.getValores())) {
 					for (String valor : indice.getValores()) {
 						if (!ValidacaoUtil.estaVazio(valor)) {
-							super.obterDao().adicionarDocumentoIndice(documento.getCodigoDocumento(), indice.getCodigoIndice(), valor);
+							super.obterDao().adicionarDocumentoIndice(documento.getCodigoDocumento(),
+									indice.getCodigoIndice(), valor);
 						}
 					}
 				}
@@ -69,24 +71,28 @@ public class DocumentoRN extends Servico<DocumentoDao> {
 			super.confirmarTransacao();
 
 			return new RespostaServico<Void>();
-		}
-		catch (Exception excecao) {
+		} catch (Exception excecao) {
 			super.cancelarTransacao();
 			throw new FalhaExecucaoException(excecao);
 		}
 	}
 
-	private void validar(final Documento documento, boolean alteracao) throws ValidacaoException, FalhaExecucaoException, RegistroInexistenteException, DaoException {
+	private void validar(final Documento documento, boolean alteracao)
+			throws ValidacaoException, FalhaExecucaoException, RegistroInexistenteException, DaoException {
 		Validador validador = new Validador();
 		validador.validarNulo("documento", documento);
 
 		if (alteracao) {
-			validador.adicionarValidacao(null, Dicionario.CODIGO_DOCUMENTO.obterValor(), documento.getCodigoDocumento()).validarPreenchimento();
+			validador.adicionarValidacao(null, Dicionario.CODIGO_DOCUMENTO.obterValor(), documento.getCodigoDocumento())
+					.validarPreenchimento();
 		}
-		validador.adicionarValidacao(null, Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(), (documento.getTipoDocumento() != null ? documento.getTipoDocumento().getCodigoTipoDocumento() : null)).validarPreenchimento();
+		validador.adicionarValidacao(null, Dicionario.CODIGO_TIPO_DOCUMENTO.obterValor(),
+				(documento.getTipoDocumento() != null ? documento.getTipoDocumento().getCodigoTipoDocumento() : null))
+				.validarPreenchimento();
 
 		if (documento.getTipoDocumento() != null && documento.getTipoDocumento().getCodigoTipoDocumento() != null) {
-			TipoDocumento tipoDocumento = new TipoDocumentoRN(super.obterConexao()).consultarPorCodigo(documento.getTipoDocumento().getCodigoTipoDocumento()).getDados();
+			TipoDocumento tipoDocumento = new TipoDocumentoRN(super.obterConexao())
+					.consultarPorCodigo(documento.getTipoDocumento().getCodigoTipoDocumento()).getDados();
 			documento.setTipoDocumento(tipoDocumento);
 			List<Indice> todosIndices = documento.getTipoDocumento().getTodosIndices();
 
@@ -102,13 +108,13 @@ public class DocumentoRN extends Servico<DocumentoDao> {
 						valor = indiceValor.getValores().get(0);
 					}
 				}
-				ParametroString parametroString = validador.adicionarValidacao(("valor" + posicao), indice.getNome(), valor);
+				ParametroString parametroString = validador.adicionarValidacao(("valor" + posicao), indice.getNome(),
+						valor);
 
 				if (indice.getPreenchimentoObrigatorio()) {
 					parametroString.validarPreenchimento();
-					parametroString.validarTamanho(1, 200).dependeValidacaoAnterior();
-				}
-				else {
+					parametroString.validarTamanho(1, 200);
+				} else {
 					parametroString.validarTamanho(1, 200);
 				}
 				indice.getTipoIndice().adicionarValidacao(parametroString);
@@ -117,15 +123,15 @@ public class DocumentoRN extends Servico<DocumentoDao> {
 		validador.adicionarValidacao(null, "Arquivos", documento.getArquivos()).validarPreenchimento();
 		validador.adicionarValidacao(new Validacao() {
 
-			@Override
 			public void validar() throws ValidacaoException, FalhaExecucaoException {
 				new ArquivoRN().validar(documento.getArquivos());
 			}
-		}).dependeValidacaoAnterior();
+		});
 		validador.validar();
 	}
 
 	private static String obterCaminhoArquivo(TipoDocumento tipoDocumento) {
-		return CAMINHO_REPOSITORIO_ARQUIVO + File.separator + tipoDocumento.getCliente().getCodigoCliente() + File.separator + tipoDocumento.getCodigoTipoDocumento() + File.separator;
+		return CAMINHO_REPOSITORIO_ARQUIVO + File.separator + tipoDocumento.getCliente().getCodigoCliente()
+				+ File.separator + tipoDocumento.getCodigoTipoDocumento() + File.separator;
 	}
 }

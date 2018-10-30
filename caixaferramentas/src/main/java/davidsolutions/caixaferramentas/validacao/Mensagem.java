@@ -21,4 +21,15 @@ public class Mensagem {
 	public String getMensagem() {
 		return this.mensagem;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Mensagem [identificacaoCampo=");
+		builder.append(identificacaoCampo);
+		builder.append(", mensagem=");
+		builder.append(mensagem);
+		builder.append("]");
+		return builder.toString();
+	}
 }
