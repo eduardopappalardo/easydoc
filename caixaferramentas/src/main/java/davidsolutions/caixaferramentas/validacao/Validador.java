@@ -9,7 +9,7 @@ import davidsolutions.caixaferramentas.servico.FalhaExecucaoException;
 
 public class Validador {
 
-	private List<Parametro> parametros = new ArrayList<Parametro>();
+	private List<Parametro<?, ?>> parametros = new ArrayList<Parametro<?, ?>>();
 
 	public ParametroString adicionarValidacao(String identificacaoParametro, String nomeParametro,
 			String valorParametro) {
