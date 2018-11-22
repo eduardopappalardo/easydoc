@@ -93,7 +93,7 @@ public class Validador {
 			this.valor = valor;
 		}
 
-		public List<Validacao> getValidacoes() {
+		protected List<Validacao> getValidacoes() {
 			return this.validacoes;
 		}
 
